@@ -1,24 +1,35 @@
 import { GraphEvalContext } from '@nodescript/core/runtime';
 import { RequestMethod, RequestSpec, ResponseSpec } from '@nodescript/core/schema';
 import { errorToResponse, resultToResponse } from '@nodescript/core/util';
-import { HttpContext, HttpDict, HttpHandler } from '@nodescript/http-server';
+import { HttpContext, HttpDict, HttpHandler, HttpNext } from '@nodescript/http-server';
 import { Logger } from '@nodescript/logger';
+import { config } from 'mesh-config';
 import { dep } from 'mesh-ioc';
 
 import { PreconditionFailedError } from './errors.js';
+import { Metrics } from './Metrics.js';
+import { ModuleResolver } from './ModuleResolver.js';
 import { convertResponseStatus } from './util.js';
 
-export class InvokeHttpHandler implements HttpHandler {
+export class InvokeHandler implements HttpHandler {
+
+    @config({ default: '/invoke' }) INVOKE_PREFIX!: string;
 
     @dep() private logger!: Logger;
+    @dep() private metrics!: Metrics;
+    @dep() private moduleResolver!: ModuleResolver;
 
-    async handle(ctx: HttpContext): Promise<void> {
+    async handle(ctx: HttpContext, next: HttpNext): Promise<void> {
+        if (!ctx.path.startsWith(this.INVOKE_PREFIX)) {
+            return next();
+        }
+        const startedAt = Date.now();
         const [
             compute,
             $variables,
             $request,
         ] = await Promise.all([
-            this.resolveModule(ctx),
+            this.moduleResolver.resolveModule(this.getModuleUrl(ctx)),
             this.parseVariables(ctx),
             this.createRequestObject(ctx),
         ]);
@@ -33,22 +44,20 @@ export class InvokeHttpHandler implements HttpHandler {
         ctx.status = convertResponseStatus(response.status);
         ctx.addResponseHeaders(response.headers);
         ctx.responseBody = response.body;
+        this.metrics.invocations.incr();
+        this.metrics.invocationLatency.addMillis(Date.now() - startedAt);
     }
 
-    private async resolveModule(ctx: HttpContext) {
+    private getModuleUrl(ctx: HttpContext) {
         const moduleUrl = ctx.getRequestHeader('ns-module-url');
         if (!moduleUrl) {
             throw new PreconditionFailedError('ns-module-url required');
         }
-        try {
-            const { compute } = await import(moduleUrl);
-            if (typeof compute !== 'function') {
-                throw new PreconditionFailedError('Unsupported module: export compute function expected');
-            }
-            return compute;
-        } catch (error: any) {
-            throw new PreconditionFailedError(`Could not load module: ${error.message}`);
-        }
+        return moduleUrl;
+    }
+
+    private getRequestPath(ctx: HttpContext) {
+        return ctx.path.substring(this.INVOKE_PREFIX.length);
     }
 
     private parseVariables(ctx: HttpContext): Record<string, string> {
@@ -66,7 +75,7 @@ export class InvokeHttpHandler implements HttpHandler {
             const body = await ctx.readRequestBody();
             return {
                 method: ctx.method as RequestMethod,
-                path: ctx.path,
+                path: this.getRequestPath(ctx),
                 query: ctx.query,
                 headers: this.stripNsHeaders(ctx.requestHeaders),
                 body,

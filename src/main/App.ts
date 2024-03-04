@@ -1,4 +1,4 @@
-import { HttpServer } from '@nodescript/http-server';
+import { HttpMetricsHandler, HttpServer } from '@nodescript/http-server';
 import { Logger } from '@nodescript/logger';
 import { BaseApp, StandardLogger } from '@nodescript/microframework';
 import { createServer } from 'http';
@@ -6,8 +6,13 @@ import { Config, ProcessEnvConfig } from 'mesh-config';
 import { dep, Mesh } from 'mesh-ioc';
 import { AddressInfo } from 'net';
 
-import { InvokeHttpHandler } from './InvokeHttpHandler.js';
+import { AppHandler } from './AppHandler.js';
+import { InvokeHandler } from './InvokeHandler.js';
+import { LivenessHandler } from './LivenessHandler.js';
+import { Metrics } from './Metrics.js';
+import { ModuleResolver } from './ModuleResolver.js';
 import { enableSandbox } from './sandbox.js';
+import { StatusHandler } from './StatusHandler.js';
 
 export class App extends BaseApp {
 
@@ -19,8 +24,14 @@ export class App extends BaseApp {
         this.mesh.service(Config, ProcessEnvConfig);
         this.mesh.service(Logger, StandardLogger);
         this.mesh.service(HttpServer);
-        this.mesh.service(InvokeHttpHandler);
-        this.mesh.alias(HttpServer.HANDLER, InvokeHttpHandler);
+        this.mesh.service(HttpMetricsHandler);
+        this.mesh.service(AppHandler);
+        this.mesh.service(ModuleResolver);
+        this.mesh.service(InvokeHandler);
+        this.mesh.service(StatusHandler);
+        this.mesh.service(LivenessHandler);
+        this.mesh.service(Metrics);
+        this.mesh.alias(HttpServer.HANDLER, AppHandler);
     }
 
     createSessionScope() {

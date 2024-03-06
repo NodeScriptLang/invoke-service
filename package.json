@@ -45,7 +45,7 @@
     "dependencies": {
         "@nodescript/core": "^7.15.2",
         "@nodescript/errors": "^1.1.4",
-        "@nodescript/http-server": "^1.6.2",
+        "@nodescript/http-server": "^2.2.0",
         "@nodescript/logger": "^2.0.4",
         "@nodescript/metrics": "^1.2.0",
         "@nodescript/microframework": "^1.7.3",

@@ -1,7 +1,7 @@
 import { createHash } from 'crypto';
 import { dep } from 'mesh-ioc';
 
-import { PreconditionFailedError } from './errors.js';
+import { PreconditionFailedError } from '../errors.js';
 import { Metrics } from './Metrics.js';
 
 export class ModuleResolver {

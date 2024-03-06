@@ -1,7 +1,7 @@
 import { config } from 'dotenv';
 import { Config, ProcessEnvConfig } from 'mesh-config';
 
-import { App } from '../main/App.js';
+import { App } from '../main/app.js';
 
 config({ path: '.env' });
 config({ path: '.env.test' });

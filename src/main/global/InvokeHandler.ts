@@ -1,28 +1,22 @@
 import { GraphEvalContext } from '@nodescript/core/runtime';
 import { RequestMethod, RequestSpec, ResponseSpec } from '@nodescript/core/schema';
 import { errorToResponse, resultToResponse } from '@nodescript/core/util';
-import { HttpContext, HttpDict, HttpHandler, HttpNext } from '@nodescript/http-server';
+import { HttpContext, HttpDict, HttpHandler } from '@nodescript/http-server';
 import { Logger } from '@nodescript/logger';
-import { config } from 'mesh-config';
 import { dep } from 'mesh-ioc';
 
-import { PreconditionFailedError } from './errors.js';
+import { PreconditionFailedError } from '../errors.js';
+import { convertResponseStatus } from '../util.js';
 import { Metrics } from './Metrics.js';
 import { ModuleResolver } from './ModuleResolver.js';
-import { convertResponseStatus } from './util.js';
 
 export class InvokeHandler implements HttpHandler {
-
-    @config({ default: '/invoke' }) INVOKE_PREFIX!: string;
 
     @dep() private logger!: Logger;
     @dep() private metrics!: Metrics;
     @dep() private moduleResolver!: ModuleResolver;
 
-    async handle(ctx: HttpContext, next: HttpNext): Promise<void> {
-        if (!ctx.path.startsWith(this.INVOKE_PREFIX)) {
-            return next();
-        }
+    async handle(ctx: HttpContext): Promise<void> {
         const startedAt = Date.now();
         const [
             compute,
@@ -56,10 +50,6 @@ export class InvokeHandler implements HttpHandler {
         return moduleUrl;
     }
 
-    private getRequestPath(ctx: HttpContext) {
-        return ctx.path.substring(this.INVOKE_PREFIX.length);
-    }
-
     private parseVariables(ctx: HttpContext): Record<string, string> {
         try {
             const json = ctx.getRequestHeader('ns-variables', '{}');
@@ -75,7 +65,7 @@ export class InvokeHandler implements HttpHandler {
             const body = await ctx.readRequestBody();
             return {
                 method: ctx.method as RequestMethod,
-                path: this.getRequestPath(ctx),
+                path: ctx.path,
                 query: ctx.query,
                 headers: this.stripNsHeaders(ctx.requestHeaders),
                 body,

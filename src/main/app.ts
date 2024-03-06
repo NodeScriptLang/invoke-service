@@ -1,4 +1,4 @@
-import { HttpMetricsHandler, HttpServer } from '@nodescript/http-server';
+import { HttpErrorHandler, HttpMetricsHandler } from '@nodescript/http-server';
 import { Logger } from '@nodescript/logger';
 import { BaseApp, StandardLogger } from '@nodescript/microframework';
 import { createServer } from 'http';
@@ -6,50 +6,47 @@ import { Config, ProcessEnvConfig } from 'mesh-config';
 import { dep, Mesh } from 'mesh-ioc';
 import { AddressInfo } from 'net';
 
-import { AppHandler } from './AppHandler.js';
-import { InvokeHandler } from './InvokeHandler.js';
-import { LivenessHandler } from './LivenessHandler.js';
-import { Metrics } from './Metrics.js';
-import { ModuleResolver } from './ModuleResolver.js';
+import { AuxHttpServer } from './global/AuxHttpServer.js';
+import { InvokeHandler } from './global/InvokeHandler.js';
+import { LivenessHandler } from './global/LivenessHandler.js';
+import { MainHttpServer } from './global/MainHttpServer.js';
+import { Metrics } from './global/Metrics.js';
+import { ModuleResolver } from './global/ModuleResolver.js';
+import { StatusHandler } from './global/StatusHandler.js';
 import { enableSandbox } from './sandbox.js';
-import { StatusHandler } from './StatusHandler.js';
 
 export class App extends BaseApp {
 
-    @dep() private httpServer!: HttpServer;
+    @dep() private mainHttpServer!: MainHttpServer;
+    @dep() private auxHttpServer!: AuxHttpServer;
 
     constructor() {
         super(new Mesh('App'));
-        this.mesh.constant(HttpServer.SCOPE, () => this.createSessionScope());
         this.mesh.service(Config, ProcessEnvConfig);
         this.mesh.service(Logger, StandardLogger);
-        this.mesh.service(HttpServer);
+        this.mesh.service(Metrics);
+        this.mesh.service(MainHttpServer);
+        this.mesh.service(AuxHttpServer);
         this.mesh.service(HttpMetricsHandler);
-        this.mesh.service(AppHandler);
-        this.mesh.service(ModuleResolver);
+        this.mesh.service(HttpErrorHandler);
         this.mesh.service(InvokeHandler);
         this.mesh.service(StatusHandler);
         this.mesh.service(LivenessHandler);
-        this.mesh.service(Metrics);
-        this.mesh.alias(HttpServer.HANDLER, AppHandler);
-    }
-
-    createSessionScope() {
-        const mesh = new Mesh('Request');
-        mesh.parent = this.mesh;
-        return mesh;
+        this.mesh.service(ModuleResolver);
     }
 
     override async start() {
         await super.start();
         await this.initFetch();
         enableSandbox();
-        await this.httpServer.start();
+        await this.mainHttpServer.start();
+        await this.auxHttpServer.start();
     }
 
     override async stop() {
         await super.stop();
-        await this.httpServer.stop();
+        await this.mainHttpServer.stop();
+        await this.auxHttpServer.stop();
     }
 
     private async initFetch() {

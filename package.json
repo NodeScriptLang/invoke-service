@@ -15,11 +15,15 @@
     ],
     "scripts": {
         "clean": "rm -rf out *.tsbuildinfo",
-        "dev": "npm run clean && tsc -b -w",
+        "dev": "npm run compile && run-p dev:*",
+        "dev:ts": "tsc -b -w",
+        "dev:http": "NODE_ENV=development node ./out/bin/http.js",
         "compile": "npm run clean && tsc -b",
         "lint": "eslint --ext=.js,.ts,.vue --cache .",
-        "test": "NODE_ENV=test mocha",
-        "version": "npm run compile",
+        "test": "NODE_NO_WARNINGS=1 NODE_ENV=test mocha",
+        "build": "run-s compile",
+        "version": "run-s version:*",
+        "version:compile": "npm run compile",
         "postversion": "git push --tags origin main"
     },
     "pre-commit": [
@@ -39,6 +43,7 @@
         "dotenv": "^16.4.5",
         "eslint": "^8.24.0",
         "mocha": "^9.0.2",
+        "npm-run-all": "^4.1.5",
         "pre-commit": "^1.2.2",
         "typescript": "^4.9.5"
     },

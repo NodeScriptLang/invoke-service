@@ -20,7 +20,7 @@
         "lint": "eslint --ext=.js,.ts,.vue --cache .",
         "test": "NODE_ENV=test mocha",
         "version": "npm run compile",
-        "postversion": "npm publish --access=public && git push --tags origin main"
+        "postversion": "git push --tags origin main"
     },
     "pre-commit": [
         "lint"

@@ -1,4 +1,4 @@
-import { CounterMetric, DynamicGaugeMetric, HistogramMetric, metric } from '@nodescript/metrics';
+import { CounterMetric, DynamicGaugeMetric, GaugeMetric, HistogramMetric, metric } from '@nodescript/metrics';
 
 const process = global.process;
 
@@ -11,6 +11,10 @@ export class Metrics {
     @metric()
     invocations = new CounterMetric<{}>(
         'nodescript_invoke_invocations_total', 'Total Invocations');
+
+    @metric()
+    moduleResolutions = new GaugeMetric<{}>(
+        'nodescript_invoke_module_resolutions_total', 'Total Module Resolutions');
 
     @metric()
     cpuUsage = new DynamicGaugeMetric<{ type: string }>(() => {

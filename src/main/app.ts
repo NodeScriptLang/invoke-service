@@ -11,7 +11,7 @@ import { InvokeHandler } from './global/InvokeHandler.js';
 import { LivenessHandler } from './global/LivenessHandler.js';
 import { MainHttpServer } from './global/MainHttpServer.js';
 import { Metrics } from './global/Metrics.js';
-import { ModuleCompute } from './global/ModuleCompute.js';
+import { ModuleResolver } from './global/ModuleResolver.js';
 import { StatusHandler } from './global/StatusHandler.js';
 import { enableSandbox } from './sandbox.js';
 
@@ -25,17 +25,14 @@ export class App extends BaseApp {
         this.mesh.service(Config, ProcessEnvConfig);
         this.mesh.service(Logger, StandardLogger);
         this.mesh.service(Metrics);
-
         this.mesh.service(MainHttpServer);
         this.mesh.service(AuxHttpServer);
-
         this.mesh.service(HttpMetricsHandler);
         this.mesh.service(HttpErrorHandler);
         this.mesh.service(InvokeHandler);
         this.mesh.service(StatusHandler);
         this.mesh.service(LivenessHandler);
-
-        this.mesh.service(ModuleCompute);
+        this.mesh.service(ModuleResolver);
     }
 
     override async start() {

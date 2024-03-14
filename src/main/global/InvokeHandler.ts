@@ -1,3 +1,4 @@
+import { GraphEvalContext } from '@nodescript/core/runtime';
 import { RequestMethod, RequestSpec, ResponseSpec } from '@nodescript/core/schema';
 import { errorToResponse, resultToResponse } from '@nodescript/core/util';
 import { HttpContext, HttpDict, HttpHandler } from '@nodescript/http-server';
@@ -7,42 +8,38 @@ import { dep } from 'mesh-ioc';
 import { PreconditionFailedError } from '../errors.js';
 import { convertResponseStatus } from '../util.js';
 import { Metrics } from './Metrics.js';
-import { ModuleCompute } from './ModuleCompute.js';
+import { ModuleResolver } from './ModuleResolver.js';
 
 export class InvokeHandler implements HttpHandler {
 
     @dep() private logger!: Logger;
     @dep() private metrics!: Metrics;
-    @dep() private moduleCompute!: ModuleCompute;
+    @dep() private moduleResolver!: ModuleResolver;
 
     async handle(ctx: HttpContext): Promise<void> {
-        try {
-            const moduleUrl = this.getModuleUrl(ctx);
-            const startedAt = Date.now();
-            const [
-                $variables,
-                $request,
-            ] = await Promise.all([
-                this.parseVariables(ctx),
-                this.createRequestObject(ctx),
-            ]);
-            if (!$request) {
-                // Client disconnected, don't do any work
-                return;
-            }
-            const response = await this.computeResponse(moduleUrl, {
-                $request,
-                $variables,
-            });
-            ctx.status = convertResponseStatus(response.status);
-            ctx.addResponseHeaders(response.headers);
-            ctx.responseBody = response.body;
-            this.metrics.invocations.incr();
-            this.metrics.invocationLatency.addMillis(Date.now() - startedAt);
-        } catch (error) {
-            this.logger.error('Invocation failed', { error });
-            throw error;
+        const startedAt = Date.now();
+        const [
+            compute,
+            $variables,
+            $request,
+        ] = await Promise.all([
+            this.moduleResolver.resolveModule(this.getModuleUrl(ctx)),
+            this.parseVariables(ctx),
+            this.createRequestObject(ctx),
+        ]);
+        if (!$request) {
+            // Client disconnected, don't do any work
+            return;
         }
+        const response = await this.computeResponse(compute, {
+            $request,
+            $variables,
+        });
+        ctx.status = convertResponseStatus(response.status);
+        ctx.addResponseHeaders(response.headers);
+        ctx.responseBody = response.body;
+        this.metrics.invocations.incr();
+        this.metrics.invocationLatency.addMillis(Date.now() - startedAt);
     }
 
     private getModuleUrl(ctx: HttpContext) {
@@ -81,12 +78,16 @@ export class InvokeHandler implements HttpHandler {
         }
     }
 
-    private async computeResponse(moduleUrl: string, params: Record<string, any>): Promise<ResponseSpec> {
+    private async computeResponse(computeFn: (...args: any[]) => Promise<any>, params: Record<string, any>): Promise<ResponseSpec> {
+        const ctx = new GraphEvalContext();
+        ctx.setLocal('NS_ENV', 'server');
         try {
-            const result = await this.moduleCompute.compute(moduleUrl, params);
+            const result = await computeFn(params, ctx);
             return resultToResponse(result);
         } catch (error) {
             return errorToResponse(error);
+        } finally {
+            ctx.finalize();
         }
     }
 

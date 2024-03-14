@@ -7,5 +7,5 @@ export * from './global/InvokeHandler.js';
 export * from './global/LivenessHandler.js';
 export * from './global/MainHttpServer.js';
 export * from './global/Metrics.js';
-export * from './global/ModuleCompute.js';
+export * from './global/ModuleResolver.js';
 export * from './global/StatusHandler.js';

@@ -24,14 +24,14 @@ describe('Invoke', () => {
             assert.strictEqual(json.name, 'PreconditionFailedError');
         });
 
-        it('returns 500 when module URL fails to load', async () => {
+        it('returns 500 when module URL is unspecified', async () => {
             const res = await fetch(runtime.baseUrl + '/invoke?name=World', {
                 headers: {
                     'ns-module-url': runtime.getModuleUrl('Unknown'),
                 }
             });
             const json: any = await res.json();
-            assert.strictEqual(json.name, 'ModuleLoadFailedError');
+            assert.strictEqual(json.name, 'PreconditionFailedError');
         });
 
     });

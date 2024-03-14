@@ -12,7 +12,6 @@ export class ModuleCompute {
 
     @config({ default: 10000 }) MODULE_CACHE_SIZE!: number;
     @config({ default: 600_000 }) MODULE_CACHE_TTL!: number;
-    @config({ default: 120_000 }) INVOKE_TIMEOUT!: number;
 
     moduleCache = new LRUCache<string, string>({
         max: this.MODULE_CACHE_SIZE,
@@ -24,7 +23,23 @@ export class ModuleCompute {
         const moduleSource = await this.fetchModule(moduleUrl);
         const ctx = new GraphEvalContext();
         ctx.setLocal('NS_ENV', 'server');
-        const contextifiedObject = vm.createContext({ ctx, params, result: undefined, console });
+        const contextifiedObject = vm.createContext({
+            ctx,
+            params,
+            result: undefined,
+            setTimeout,
+            clearTimeout,
+            crypto,
+            fetch,
+            FormData,
+            Headers,
+            Request,
+            Response,
+            TextDecoder,
+            TextEncoder,
+            URL,
+            URLSearchParams,
+        });
         const module = new vm.SourceTextModule(`
         import { compute } from '@MODULE';
         try {
@@ -39,9 +54,7 @@ export class ModuleCompute {
             }
             throw new ModuleImportsNotSupported(`Unsupported import: ${specifier}`);
         });
-        await module.evaluate({
-            timeout: this.INVOKE_TIMEOUT,
-        });
+        await module.evaluate();
         return contextifiedObject.result;
     }
 

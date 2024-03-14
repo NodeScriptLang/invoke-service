@@ -17,10 +17,10 @@
         "clean": "rm -rf out *.tsbuildinfo",
         "dev": "npm run compile && run-p dev:*",
         "dev:ts": "tsc -b -w",
-        "dev:http": "NODE_ENV=development node ./out/bin/http.js",
+        "dev:http": "NODE_ENV=development node --node-option=experimental-vm-modules ./out/bin/http.js",
         "compile": "npm run clean && tsc -b",
         "lint": "eslint --ext=.js,.ts,.vue --cache .",
-        "test": "NODE_NO_WARNINGS=1 NODE_ENV=test mocha",
+        "test": "NODE_NO_WARNINGS=1 NODE_ENV=test mocha --node-option=experimental-vm-modules",
         "build": "run-s compile",
         "version": "run-s version:*",
         "version:compile": "npm run compile",
@@ -54,6 +54,7 @@
         "@nodescript/logger": "^2.0.5",
         "@nodescript/metrics": "^1.2.1",
         "@nodescript/microframework": "^1.8.4",
+        "lru-cache": "^10.2.0",
         "mesh-config": "^1.1.0",
         "mesh-ioc": "^3.3.0"
     }

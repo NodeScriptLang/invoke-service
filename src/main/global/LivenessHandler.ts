@@ -31,7 +31,6 @@ export class LivenessHandler implements HttpHandler {
         }
         try {
             this.checkMaxInvocations();
-            this.checkMaxResolutions();
             this.checkMaxUptime();
             ctx.status = 200;
             ctx.responseBody = 'OK';
@@ -49,13 +48,6 @@ export class LivenessHandler implements HttpHandler {
         const value = this.metrics.invocations.get()?.value ?? 0;
         if (value > this.MAX_INVOCATIONS) {
             throw new ServerError('Max invocations reached');
-        }
-    }
-
-    private checkMaxResolutions() {
-        const value = this.metrics.moduleResolutions.get()?.value ?? 0;
-        if (value > this.MAX_MODULE_RESOLUTIONS) {
-            throw new ServerError('Max module resolutions reached');
         }
     }
 

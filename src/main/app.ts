@@ -6,7 +6,6 @@ import { Config, ProcessEnvConfig } from 'mesh-config';
 import { dep, Mesh } from 'mesh-ioc';
 import { AddressInfo } from 'net';
 
-import { AuxHttpServer } from './global/AuxHttpServer.js';
 import { InvokeHandler } from './global/InvokeHandler.js';
 import { LivenessHandler } from './global/LivenessHandler.js';
 import { MainHttpServer } from './global/MainHttpServer.js';
@@ -18,7 +17,6 @@ import { enableSandbox } from './sandbox.js';
 export class App extends BaseApp {
 
     @dep() private mainHttpServer!: MainHttpServer;
-    @dep() private auxHttpServer!: AuxHttpServer;
 
     constructor() {
         super(new Mesh('App'));
@@ -26,7 +24,6 @@ export class App extends BaseApp {
         this.mesh.service(Logger, StandardLogger);
         this.mesh.service(Metrics);
         this.mesh.service(MainHttpServer);
-        this.mesh.service(AuxHttpServer);
         this.mesh.service(HttpMetricsHandler);
         this.mesh.service(HttpErrorHandler);
         this.mesh.service(InvokeHandler);
@@ -40,13 +37,11 @@ export class App extends BaseApp {
         await this.initFetch();
         enableSandbox();
         await this.mainHttpServer.start();
-        await this.auxHttpServer.start();
     }
 
     override async stop() {
         await super.stop();
         await this.mainHttpServer.stop();
-        await this.auxHttpServer.stop();
     }
 
     private async initFetch() {

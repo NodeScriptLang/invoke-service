@@ -26,7 +26,7 @@ jobs:
       gh_repo: infrastructure
       image_name: nodescript-invoke-service
       env_name: production
-      app_path: apps/invoke-service
+      app_path: apps/invoke-groups
       auto_merge: true
     secrets:
       ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}

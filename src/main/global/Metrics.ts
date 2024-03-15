@@ -2,11 +2,17 @@ import { CounterMetric, DynamicGaugeMetric, GaugeMetric, HistogramMetric, metric
 
 const process = global.process;
 
+const EXTENDED_LATENCY_BUCKETS = [
+    0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5,
+    1, 2.5, 5, 10, 20, 30, 60,
+    90, 120, 180, 240, 300, 600, 900, 1200
+];
+
 export class Metrics {
 
     @metric()
     invocationLatency = new HistogramMetric<{}>(
-        'nodescript_invoke_latency_seconds', 'Invoke Latency');
+        'nodescript_invoke_latency_seconds', 'Invoke Latency', EXTENDED_LATENCY_BUCKETS);
 
     @metric()
     invocations = new CounterMetric<{}>(

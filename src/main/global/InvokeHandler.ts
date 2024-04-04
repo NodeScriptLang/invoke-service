@@ -11,7 +11,6 @@ import { ModuleResolver } from './ModuleResolver.js';
 
 export class InvokeHandler implements HttpHandler {
 
-    @dep() private logger!: Logger;
     @dep() private metrics!: Metrics;
     @dep() private moduleResolver!: ModuleResolver;
 
@@ -37,6 +36,7 @@ export class InvokeHandler implements HttpHandler {
         ctx.responseBody = response.body;
         this.metrics.invocations.incr();
         this.metrics.invocationLatency.addMillis(Date.now() - startedAt);
+        ctx.log = false;
     }
 
     private async readParams(ctx: HttpContext) {

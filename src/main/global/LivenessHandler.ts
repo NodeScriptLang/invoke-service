@@ -35,6 +35,7 @@ export class LivenessHandler implements HttpHandler {
             this.checkMaxUptime();
             ctx.status = 200;
             ctx.responseBody = 'OK';
+            ctx.log = false;
         } catch (error: any) {
             ctx.status = 503;
             ctx.responseBody = {

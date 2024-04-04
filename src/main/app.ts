@@ -1,4 +1,4 @@
-import { HttpErrorHandler, HttpMetricsHandler } from '@nodescript/http-server';
+import { HttpErrorHandler, HttpMetricsHandler, HttpStatusHandler } from '@nodescript/http-server';
 import { Logger } from '@nodescript/logger';
 import { BaseApp, StandardLogger } from '@nodescript/microframework';
 import { createServer } from 'http';
@@ -11,7 +11,6 @@ import { LivenessHandler } from './global/LivenessHandler.js';
 import { MainHttpServer } from './global/MainHttpServer.js';
 import { Metrics } from './global/Metrics.js';
 import { ModuleResolver } from './global/ModuleResolver.js';
-import { StatusHandler } from './global/StatusHandler.js';
 import { enableSandbox } from './sandbox.js';
 
 export class App extends BaseApp {
@@ -25,9 +24,9 @@ export class App extends BaseApp {
         this.mesh.service(Metrics);
         this.mesh.service(MainHttpServer);
         this.mesh.service(HttpMetricsHandler);
+        this.mesh.service(HttpStatusHandler);
         this.mesh.service(HttpErrorHandler);
         this.mesh.service(InvokeHandler);
-        this.mesh.service(StatusHandler);
         this.mesh.service(LivenessHandler);
         this.mesh.service(ModuleResolver);
     }

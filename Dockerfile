@@ -19,4 +19,4 @@ COPY --from=builder /builder .
 RUN npm ci --production
 
 WORKDIR /app
-CMD ["node", "out/bin/http.js"]
+CMD ["node", "out/bin/run.js"]

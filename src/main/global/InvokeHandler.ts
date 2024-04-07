@@ -1,18 +1,34 @@
 import { GraphEvalContext } from '@nodescript/core/runtime';
 import { ResponseSpec } from '@nodescript/core/schema';
 import { errorToResponse, resultToResponse } from '@nodescript/core/util';
-import { HttpContext, HttpHandler, HttpNext } from '@nodescript/http-server';
-import { Logger } from '@nodescript/logger';
+import { ServerError } from '@nodescript/errors';
+import { HttpContext, HttpHandler, HttpNext, statusCheck } from '@nodescript/http-server';
+import { CounterMetric, HistogramMetric, metric } from '@nodescript/metrics';
+import { config } from 'mesh-config';
 import { dep } from 'mesh-ioc';
 
 import { PreconditionFailedError } from '../errors.js';
-import { Metrics } from './Metrics.js';
 import { ModuleResolver } from './ModuleResolver.js';
+
+const EXTENDED_LATENCY_BUCKETS = [
+    0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5,
+    1, 2.5, 5, 10, 20, 30, 60,
+    90, 120, 180, 240, 300, 600, 900, 1200
+];
 
 export class InvokeHandler implements HttpHandler {
 
-    @dep() private metrics!: Metrics;
+    @config({ default: 10_000_000_000 }) MAX_INVOCATIONS!: number;
+
     @dep() private moduleResolver!: ModuleResolver;
+
+    @metric()
+    private latency = new HistogramMetric<{}>(
+        'nodescript_invoke_latency_seconds', 'Invoke Latency', EXTENDED_LATENCY_BUCKETS);
+
+    @metric()
+    private count = new CounterMetric<{}>(
+        'nodescript_invoke_invocations_total', 'Total Invocations');
 
     async handle(ctx: HttpContext, next: HttpNext): Promise<void> {
         if (ctx.method !== 'POST' || ctx.path !== '/invoke') {
@@ -34,9 +50,18 @@ export class InvokeHandler implements HttpHandler {
         ctx.status = response.status;
         ctx.addResponseHeaders(response.headers);
         ctx.responseBody = response.body;
-        this.metrics.invocations.incr();
-        this.metrics.invocationLatency.addMillis(Date.now() - startedAt);
+        this.count.incr();
+        this.latency.addMillis(Date.now() - startedAt);
         ctx.log = false;
+    }
+
+    @statusCheck()
+    checkMaxInvocations() {
+        const value = this.count.get({})?.value ?? 0;
+        if (value > this.MAX_INVOCATIONS) {
+            throw new ServerError('Max invocations reached');
+        }
+        return 'ok';
     }
 
     private async readParams(ctx: HttpContext) {

@@ -1,34 +1,26 @@
-import { HttpErrorHandler, HttpMetricsHandler, HttpStatusHandler } from '@nodescript/http-server';
-import { Logger } from '@nodescript/logger';
-import { BaseApp, StandardLogger } from '@nodescript/microframework';
+import { AuxHttpServer, BaseApp } from '@nodescript/microframework';
 import { createServer } from 'http';
-import { Config, ProcessEnvConfig } from 'mesh-config';
 import { dep, Mesh } from 'mesh-ioc';
 import { AddressInfo } from 'net';
 
 import { InvokeHandler } from './global/InvokeHandler.js';
-import { LivenessHandler } from './global/LivenessHandler.js';
 import { MainHttpServer } from './global/MainHttpServer.js';
-import { Metrics } from './global/Metrics.js';
 import { ModuleResolver } from './global/ModuleResolver.js';
+import { UptimeChecker } from './global/UptimeChecker.js';
 import { enableSandbox } from './sandbox.js';
 
 export class App extends BaseApp {
 
     @dep() private mainHttpServer!: MainHttpServer;
+    @dep() private auxHttpServer!: AuxHttpServer;
 
     constructor() {
         super(new Mesh('App'));
-        this.mesh.service(Config, ProcessEnvConfig);
-        this.mesh.service(Logger, StandardLogger);
-        this.mesh.service(Metrics);
         this.mesh.service(MainHttpServer);
-        this.mesh.service(HttpMetricsHandler);
-        this.mesh.service(HttpStatusHandler);
-        this.mesh.service(HttpErrorHandler);
+        this.mesh.service(AuxHttpServer);
         this.mesh.service(InvokeHandler);
-        this.mesh.service(LivenessHandler);
         this.mesh.service(ModuleResolver);
+        this.mesh.service(UptimeChecker);
     }
 
     override async start() {
@@ -36,11 +28,13 @@ export class App extends BaseApp {
         await this.initFetch();
         enableSandbox();
         await this.mainHttpServer.start();
+        await this.auxHttpServer.start();
     }
 
     override async stop() {
         await super.stop();
         await this.mainHttpServer.stop();
+        await this.auxHttpServer.stop();
     }
 
     private async initFetch() {

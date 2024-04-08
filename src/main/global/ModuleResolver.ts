@@ -1,12 +1,16 @@
 import { ServerError } from '@nodescript/errors';
 import { statusCheck } from '@nodescript/http-server';
+import { Logger } from '@nodescript/logger';
 import { GaugeMetric, metric } from '@nodescript/metrics';
 import { createHash } from 'crypto';
 import { config } from 'mesh-config';
+import { dep } from 'mesh-ioc';
 
 import { PreconditionFailedError } from '../errors.js';
 
 export class ModuleResolver {
+
+    @dep() private logger!: Logger;
 
     @config({ default: 10_000 }) MAX_MODULE_RESOLUTIONS!: number;
 
@@ -21,6 +25,7 @@ export class ModuleResolver {
     @statusCheck()
     checkMaxResolutions() {
         if (this.moduleHashes.size > this.MAX_MODULE_RESOLUTIONS) {
+            this.logger.warn('Max module resoultions reached');
             throw new ServerError('Max module resolutions reached');
         }
         return 'ok';

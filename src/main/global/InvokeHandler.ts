@@ -3,6 +3,7 @@ import { ResponseSpec } from '@nodescript/core/schema';
 import { errorToResponse, resultToResponse } from '@nodescript/core/util';
 import { ServerError } from '@nodescript/errors';
 import { HttpContext, HttpHandler, HttpNext, statusCheck } from '@nodescript/http-server';
+import { Logger } from '@nodescript/logger';
 import { CounterMetric, HistogramMetric, metric } from '@nodescript/metrics';
 import { config } from 'mesh-config';
 import { dep } from 'mesh-ioc';
@@ -16,10 +17,13 @@ const EXTENDED_LATENCY_BUCKETS = [
     90, 120, 180, 240, 300, 600, 900, 1200
 ];
 
+const process = global.process;
+
 export class InvokeHandler implements HttpHandler {
 
     @config({ default: 10_000_000_000 }) MAX_INVOCATIONS!: number;
 
+    @dep() private logger!: Logger;
     @dep() private moduleResolver!: ModuleResolver;
 
     @metric()
@@ -49,16 +53,17 @@ export class InvokeHandler implements HttpHandler {
         const response = await this.computeResponse(compute, params);
         ctx.status = response.status;
         ctx.addResponseHeaders(response.headers);
+        ctx.addResponseHeader('ns-invoke-pod', String(process.env.HOSTNAME));
         ctx.responseBody = response.body;
         this.count.incr();
         this.latency.addMillis(Date.now() - startedAt);
-        ctx.log = false;
     }
 
     @statusCheck()
     checkMaxInvocations() {
         const value = this.count.get({})?.value ?? 0;
         if (value > this.MAX_INVOCATIONS) {
+            this.logger.warn('Max invocations reached');
             throw new ServerError('Max invocations reached');
         }
         return 'ok';

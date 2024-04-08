@@ -17,7 +17,7 @@
         "clean": "rm -rf out *.tsbuildinfo",
         "dev": "npm run compile && run-p dev:*",
         "dev:ts": "tsc -b -w",
-        "dev:http": "NODE_ENV=development node ./out/bin/http.js",
+        "dev:http": "NODE_ENV=development node ./out/bin/run.js",
         "compile": "npm run clean && tsc -b",
         "lint": "eslint --ext=.js,.ts,.vue --cache .",
         "test": "NODE_NO_WARNINGS=1 NODE_ENV=test mocha",

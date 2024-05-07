@@ -13,8 +13,6 @@ jobs:
       file: Dockerfile
     secrets:
       REGISTRY_SECRET: ${{ secrets.GCP_REGISTRY_ACCESS }}
-      SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
-      SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL }}
 
   deploy-production:
     needs: build

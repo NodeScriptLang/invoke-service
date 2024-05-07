@@ -7,10 +7,10 @@ on:
 
 jobs:
   build:
-    uses: ubio/github-actions/.github/workflows/ci-build.yaml@master
+    uses: NodeScriptLang/github-actions/.github/workflows/ci-build.yaml@main
     with:
       name: NodeScript Invoke Service
-      image: gcr.io/automation-cloud-registry/nodescript-invoke-service
+      image: europe-west1-docker.pkg.dev/nodescript-production/nodescript-image-registry/nodescript-invoke-service
       ref: ${{ github.ref }}
       file: Dockerfile
     secrets:
@@ -20,7 +20,7 @@ jobs:
 
   deploy-production:
     needs: build
-    uses: ubio/github-actions/.github/workflows/cd-dispatch-deploy.yaml@master
+    uses: NodeScriptLang/github-actions/.github/workflows/ci-deploy.yaml@main
     with:
       gh_user: NodeScriptLang
       gh_repo: infrastructure

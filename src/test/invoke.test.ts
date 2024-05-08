@@ -54,4 +54,18 @@ describe('Invoke', () => {
         assert.strictEqual(text, '');
     });
 
+    it('returns binary', async () => {
+        const res = await fetch(runtime.baseUrl + '/invoke', {
+            method: 'POST',
+            headers: {
+                'ns-module-url': runtime.getModuleUrl('BinaryService'),
+            },
+            body: '',
+        });
+        assert.strictEqual(res.status, 200);
+        const buf = await res.arrayBuffer();
+        assert.strictEqual(res.headers.get('content-length'), '5');
+        assert.deepStrictEqual(new Uint8Array(buf), new Uint8Array([0, 1, 2, 3, 4]));
+    });
+
 });

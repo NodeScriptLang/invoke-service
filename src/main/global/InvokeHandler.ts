@@ -10,6 +10,7 @@ import { dep } from 'mesh-ioc';
 
 import { PreconditionFailedError } from '../errors.js';
 import { ModuleResolver } from './ModuleResolver.js';
+import { unifiedFetch } from '@nodescript/unified-fetch/backend';
 
 const EXTENDED_LATENCY_BUCKETS = [
     0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5,
@@ -95,6 +96,7 @@ export class InvokeHandler implements HttpHandler {
     private async computeResponse(computeFn: (...args: any[]) => Promise<any>, params: Record<string, any>): Promise<ResponseSpec> {
         const ctx = new GraphEvalContext();
         ctx.setLocal('NS_ENV', 'server');
+        ctx.setLocal('NS_FETCH_FUNCTION', unifiedFetch);
         try {
             const result = await computeFn(params, ctx);
             return resultToResponse(result);

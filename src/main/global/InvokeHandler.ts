@@ -5,12 +5,12 @@ import { ServerError } from '@nodescript/errors';
 import { HttpContext, HttpHandler, HttpNext, statusCheck } from '@nodescript/http-server';
 import { Logger } from '@nodescript/logger';
 import { CounterMetric, HistogramMetric, metric } from '@nodescript/metrics';
+import { unifiedFetch } from '@nodescript/unified-fetch/backend';
 import { config } from 'mesh-config';
 import { dep } from 'mesh-ioc';
 
 import { PreconditionFailedError } from '../errors.js';
 import { ModuleResolver } from './ModuleResolver.js';
-import { unifiedFetch } from '@nodescript/unified-fetch/backend';
 
 const EXTENDED_LATENCY_BUCKETS = [
     0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5,

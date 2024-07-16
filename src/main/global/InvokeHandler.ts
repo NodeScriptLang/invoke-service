@@ -5,7 +5,7 @@ import { ServerError } from '@nodescript/errors';
 import { HttpContext, HttpHandler, HttpNext, statusCheck } from '@nodescript/http-server';
 import { Logger } from '@nodescript/logger';
 import { CounterMetric, HistogramMetric, metric } from '@nodescript/metrics';
-import { unifiedFetch } from '@nodescript/unified-fetch/backend';
+import { fetchUndici } from '@nodescript/fetch-undici';
 import { config } from 'mesh-config';
 import { dep } from 'mesh-ioc';
 
@@ -95,8 +95,9 @@ export class InvokeHandler implements HttpHandler {
 
     private async computeResponse(computeFn: (...args: any[]) => Promise<any>, params: Record<string, any>): Promise<ResponseSpec> {
         const ctx = new GraphEvalContext();
+        ctx.lib.fetch = fetchUndici;
         ctx.setLocal('NS_ENV', 'server');
-        ctx.setLocal('NS_FETCH_FUNCTION', unifiedFetch);
+        ctx.setLocal('NS_FETCH_FUNCTION', fetchUndici); // Deprecated, left for compatibility
         try {
             const result = await computeFn(params, ctx);
             return resultToResponse(result);

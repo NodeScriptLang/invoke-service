@@ -2,10 +2,10 @@ import { GraphEvalContext } from '@nodescript/core/runtime';
 import { ResponseSpec } from '@nodescript/core/schema';
 import { errorToResponse, resultToResponse } from '@nodescript/core/util';
 import { ServerError } from '@nodescript/errors';
+import { fetchUndici } from '@nodescript/fetch-undici';
 import { HttpContext, HttpHandler, HttpNext, statusCheck } from '@nodescript/http-server';
 import { Logger } from '@nodescript/logger';
 import { CounterMetric, HistogramMetric, metric } from '@nodescript/metrics';
-import { fetchUndici } from '@nodescript/fetch-undici';
 import { config } from 'mesh-config';
 import { dep } from 'mesh-ioc';
 

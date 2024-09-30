@@ -8,6 +8,7 @@ import { MainHttpServer } from './global/MainHttpServer.js';
 import { ModuleResolver } from './global/ModuleResolver.js';
 import { UptimeChecker } from './global/UptimeChecker.js';
 import { enableSandbox } from './sandbox.js';
+import { StructuredLogFormatter } from '@nodescript/logger';
 
 export class App extends BaseApp {
 

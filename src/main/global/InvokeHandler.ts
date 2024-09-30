@@ -102,6 +102,7 @@ export class InvokeHandler implements HttpHandler {
             const result = await computeFn(params, ctx);
             return resultToResponse(result);
         } catch (error) {
+            this.logger.warn('Graph error', { error });
             return errorToResponse(error);
         } finally {
             ctx.finalize();

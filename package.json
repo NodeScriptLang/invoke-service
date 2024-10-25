@@ -19,7 +19,7 @@
         "dev:ts": "tsc -b -w",
         "dev:http": "NODE_ENV=development node ./out/bin/run.js",
         "compile": "npm run clean && tsc -b",
-        "lint": "eslint --ext=.js,.ts,.vue --cache .",
+        "lint": "eslint --cache .",
         "test": "NODE_NO_WARNINGS=1 NODE_ENV=test mocha",
         "build": "run-s compile",
         "version": "run-s version:*",

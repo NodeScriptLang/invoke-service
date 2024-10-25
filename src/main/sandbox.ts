@@ -5,7 +5,7 @@ const console = global.console;
 
 const processStub = {
     env: {},
-    nextTick: (cb: Function, ...args: any[]) => process.nextTick(cb, ...args),
+    nextTick: (cb: any, ...args: any[]) => process.nextTick(cb, ...args),
 };
 
 const consoleStub: any = {};

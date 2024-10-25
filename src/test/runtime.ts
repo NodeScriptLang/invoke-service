@@ -30,6 +30,7 @@ export class TestRuntime {
     getModuleUrl(moduleName: string) {
         return new URL(`./modules/${moduleName}.js`, import.meta.url).toString();
     }
+
 }
 
 export const runtime = new TestRuntime();

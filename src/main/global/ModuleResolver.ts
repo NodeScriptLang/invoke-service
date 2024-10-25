@@ -20,7 +20,7 @@ export class ModuleResolver {
 
     // Used to count unique module URLs
     // TODO consider replacing with HyperLogLog to avoid storing
-    private moduleHashes = new Set<string>;
+    private moduleHashes = new Set<string>();
 
     @statusCheck()
     checkMaxResolutions() {

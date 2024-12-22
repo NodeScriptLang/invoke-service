@@ -51,11 +51,11 @@
         "@nodescript/core": "^7.21.3",
         "@nodescript/errors": "^1.2.0",
         "@nodescript/fetch-undici": "^1.4.0",
-        "@nodescript/http-server": "^2.9.0",
+        "@nodescript/http-server": "^2.9.1",
         "@nodescript/logger": "^2.0.6",
-        "@nodescript/metrics": "^1.7.0",
-        "@nodescript/microframework": "^1.15.0",
-        "mesh-config": "^1.2.0",
-        "mesh-ioc": "^4.0.1"
+        "@nodescript/metrics": "^1.7.1",
+        "@nodescript/microframework": "^1.15.1",
+        "mesh-config": "^1.2.1",
+        "mesh-ioc": "^4.1.0"
     }
 }

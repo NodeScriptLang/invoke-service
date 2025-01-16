@@ -27,7 +27,6 @@ export function enableSandbox() {
         console: createConditionalSandbox(console, consoleStub, sandboxCondition),
         [sandboxSymbol]: true,
     });
-    Object.freeze(globalThis);
 }
 
 export function createConditionalSandbox<T extends object>(target: T, stub: any, returnOriginal: () => boolean) {

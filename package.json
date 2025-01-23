@@ -55,6 +55,7 @@
         "@nodescript/logger": "^2.0.6",
         "@nodescript/metrics": "^1.7.1",
         "@nodescript/microframework": "^1.15.1",
+        "@nodescript/module-loader": "^1.0.4",
         "mesh-config": "^1.2.1",
         "mesh-ioc": "^4.1.0"
     }

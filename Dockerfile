@@ -19,9 +19,4 @@ COPY --from=builder /builder .
 RUN npm ci --production
 
 WORKDIR /app
-CMD [
-    "node",
-    "--import",
-    "@nodescript/module-loader/register",
-    "out/bin/run.js"
-]
+CMD ["node", "--import", "@nodescript/module-loader/register", "out/bin/run.js"]

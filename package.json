@@ -54,7 +54,7 @@
         "@nodescript/http-server": "^2.10.1",
         "@nodescript/logger": "^2.0.6",
         "@nodescript/metrics": "^1.7.1",
-        "@nodescript/microframework": "^1.15.2",
+        "@nodescript/microframework": "^1.15.3",
         "@nodescript/module-loader": "^1.0.5",
         "mesh-config": "^1.2.1",
         "mesh-ioc": "^4.1.0"

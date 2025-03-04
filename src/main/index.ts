@@ -5,3 +5,4 @@ export * from './global/MainHttpServer.js';
 export * from './global/ModuleResolver.js';
 export * from './global/UptimeChecker.js';
 export * from './sandbox.js';
+export * from './util/stack.js';

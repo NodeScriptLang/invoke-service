@@ -10,6 +10,7 @@ import { config } from 'mesh-config';
 import { dep } from 'mesh-ioc';
 
 import { PreconditionFailedError } from '../errors.js';
+import { parseStack } from '../util/stack.js';
 import { ModuleResolver } from './ModuleResolver.js';
 
 const EXTENDED_LATENCY_BUCKETS = [
@@ -101,9 +102,17 @@ export class InvokeHandler implements HttpHandler {
         try {
             const result = await computeFn(params, ctx);
             return resultToResponse(result);
-        } catch (error) {
+        } catch (error: any) {
             this.logger.warn('Graph error', { error });
-            return errorToResponse(error);
+            const res = errorToResponse(error);
+            const stack = parseStack(error?.stack ?? '');
+            // TODO observe if this is enough
+            const nodeUids = stack
+                .map(item => item.symbol)
+                .filter(symbol => symbol.startsWith('root:'))
+                .slice(0, 20);
+            res.headers['ns-stack'] = [nodeUids.join(',')];
+            return res;
         } finally {
             ctx.finalize();
         }

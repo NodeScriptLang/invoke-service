@@ -1,8 +1,9 @@
 import assert from 'assert';
 
-import { parseStack } from '../main/util/stack.js';
+import { findErrorLocation, parseStack } from '../main/util/stack.js';
 
 describe('parseStack', () => {
+
     it('parses error stack', () => {
         const stack = `
          error: Error [BoomError]: Something bad happened
@@ -30,4 +31,25 @@ describe('parseStack', () => {
             { symbol: 'derived.computeResponse', source: 'file:///foo/bar/baz/InvokeHandler.js:90:28' },
         ]);
     });
+
+    it('finds error location', () => {
+        const stack = `
+         Graph error {
+  error: Error [BoomError]: Something happened, but we don't know what
+      at compute (data:text/javascript;base64,...:1:340)
+      at root:9uJNBoCS (data:text/javascript;base64,...:1:591)
+      at root:result (data:text/javascript;base64,...:1:480)
+      at root:Hvok7Y1K:Q8niRNV4 (data:text/javascript;base64,...:1:1264)
+      at root:Hvok7Y1K:result (data:text/javascript;base64,...:1:1144)
+      at data:text/javascript;base64,...:1:1014
+      at compute (data:text/javascript;base64,...:1:209)
+      at root:Hvok7Y1K (data:text/javascript;base64,...:1:992)
+      at async Promise.all (index 0)
+      at async root:result (data:text/javascript;base64,...:1:814)
+      `;
+        const parsed = parseStack(stack);
+        const location = findErrorLocation(parsed);
+        assert.strictEqual(location, 'root:Hvok7Y1K:Q8niRNV4');
+    });
+
 });

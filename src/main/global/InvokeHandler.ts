@@ -1,6 +1,6 @@
 import { GraphEvalContext } from '@nodescript/core/runtime';
 import { ResponseSpec } from '@nodescript/core/schema';
-import { errorToResponse, resultToResponse } from '@nodescript/core/util';
+import { errorToResponse, parseStack, resultToResponse } from '@nodescript/core/util';
 import { ServerError } from '@nodescript/errors';
 import { fetchUndici } from '@nodescript/fetch-undici';
 import { HttpContext, HttpHandler, HttpNext, statusCheck } from '@nodescript/http-server';
@@ -10,7 +10,6 @@ import { config } from 'mesh-config';
 import { dep } from 'mesh-ioc';
 
 import { PreconditionFailedError } from '../errors.js';
-import { findErrorLocation, parseStack } from '../util/stack.js';
 import { ModuleResolver } from './ModuleResolver.js';
 
 const EXTENDED_LATENCY_BUCKETS = [
@@ -105,15 +104,32 @@ export class InvokeHandler implements HttpHandler {
         } catch (error: any) {
             this.logger.warn('Graph error', { error });
             const res = errorToResponse(error);
-            const stack = parseStack(error?.stack ?? '');
-            const location = findErrorLocation(stack);
-            if (location) {
-                res.headers['ns-error-location'] = [location];
+            const stack = this.parseStack(error);
+            if (stack) {
+                res.headers['ns-stack'] = [stack];
             }
             return res;
         } finally {
             ctx.finalize();
         }
+    }
+
+    private parseStack(error: any) {
+        // We're only interested in the deepest nodeUid from each graph
+        const stack = parseStack(error?.stack ?? '');
+        const items: string[] = [];
+        let lastGraphId = '';
+        for (const item of stack) {
+            const { graphId, nodeUid } = item;
+            if (!graphId || !nodeUid) {
+                continue;
+            }
+            if (graphId !== lastGraphId) {
+                items.push(`${graphId}@${nodeUid}`);
+            }
+            lastGraphId = graphId;
+        }
+        return items.join(',');
     }
 
 }

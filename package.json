@@ -48,9 +48,9 @@
         "typescript": "^5.5.3"
     },
     "dependencies": {
-        "@nodescript/core": "^7.24.0",
+        "@nodescript/core": "^7.25.2",
         "@nodescript/errors": "^1.2.0",
-        "@nodescript/fetch-undici": "^1.4.3",
+        "@nodescript/fetch-undici": "^1.4.6",
         "@nodescript/http-server": "^2.10.1",
         "@nodescript/logger": "^2.0.6",
         "@nodescript/metrics": "^1.7.1",

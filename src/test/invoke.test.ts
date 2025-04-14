@@ -68,4 +68,18 @@ describe('Invoke', () => {
         assert.deepStrictEqual(new Uint8Array(buf), new Uint8Array([0, 1, 2, 3, 4]));
     });
 
+    it('sends outbound request', async () => {
+        const res = await fetch(runtime.baseUrl + '/invoke', {
+            method: 'POST',
+            headers: {
+                'ns-module-url': runtime.getModuleUrl('OutboundHttpRequestService'),
+            },
+            body: JSON.stringify({
+                name: 'World',
+            }),
+        });
+        const text = await res.text();
+        assert.strictEqual(res.status, 200);
+        assert.strictEqual(text, 'Hello, World');
+    });
 });

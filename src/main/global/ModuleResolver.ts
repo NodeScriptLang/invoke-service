@@ -36,10 +36,12 @@ export class ModuleResolver {
             this.trackModuleUrl(moduleUrl);
             const { compute } = await import(moduleUrl);
             if (typeof compute !== 'function') {
+                this.logger.warn('Unsupported module: export compute function expected');
                 throw new PreconditionFailedError('Unsupported module: export compute function expected');
             }
             return compute;
         } catch (error: any) {
+            this.logger.warn(`Module loading failed`, { error });
             throw new PreconditionFailedError(`Could not load module: ${error.message}`);
         }
     }

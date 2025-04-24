@@ -1,6 +1,6 @@
 {
     "name": "@nodescript/invoke-service",
-    "version": "2.18.0",
+    "version": "2.19.0",
     "description": "Invokes NodeScript modules on request",
     "type": "module",
     "sideEffects": false,

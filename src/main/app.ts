@@ -5,6 +5,7 @@ import { AddressInfo } from 'net';
 
 import { InvokeHandler } from './global/InvokeHandler.js';
 import { MainHttpServer } from './global/MainHttpServer.js';
+import { Metrics } from './global/Metrics.js';
 import { ModuleResolver } from './global/ModuleResolver.js';
 import { UptimeChecker } from './global/UptimeChecker.js';
 import { enableSandbox } from './sandbox.js';
@@ -21,6 +22,7 @@ export class App extends BaseApp {
         this.mesh.service(InvokeHandler);
         this.mesh.service(ModuleResolver);
         this.mesh.service(UptimeChecker);
+        this.mesh.service(Metrics);
     }
 
     override async start() {
